@@ -8,20 +8,26 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.tigcal.samples.restosearch.network.MapRepository
 import kotlinx.coroutines.launch
@@ -34,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var repository: MapRepository
     private lateinit var viewModel: MapViewModel
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.restaurants.collect {
                         //TODO add to list
+                        Log.d("Restaurants", "Restaurants: $it")
                     }
                 }
                 launch {
@@ -64,6 +72,28 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        recyclerView = findViewById(R.id.recycler_view)
+        recyclerView.apply {
+            setHasFixedSize(true)
+            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+//            adapter =
+        }
+
+        val bottomNavigationView: BottomNavigationView? = findViewById(R.id.bottom_navigation)
+        bottomNavigationView?.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
+            when(item.itemId) {
+                R.id.action_list -> {
+                    showList()
+                    return@OnItemSelectedListener true
+                }
+                R.id.action_map -> {
+                    showMap()
+                    return@OnItemSelectedListener true
+                }
+            }
+            false
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -104,6 +134,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showList() {
+        recyclerView.isVisible = true
+        //TODO hide map
+    }
+
+    private fun showMap() {
+        //TODO show map
+        recyclerView.isVisible = false
+    }
+
 
     @SuppressLint("MissingPermission")
     private fun searchRestaurant(query: String) {
