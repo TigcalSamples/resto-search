@@ -8,4 +8,6 @@
     <string name="permission_needed">Location permission is needed to search for nearby restaurants.</string>
     <string name="permission_okay">OK</string>
     <string name="permission_cancel">Cancel</string>
+
+    <string name="restaurant">Restaurant</string>
 </resources>
