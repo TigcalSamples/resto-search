@@ -252,5 +252,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun openRestaurantDetails(resto: Restaurant) {
         Log.d("resto", "open: $resto")
+        val intent = Intent(this, RestaurantActivity::class.java).apply {
+//            putExtra("", "")
+
+        }
+        startActivity(intent)
     }
 }
