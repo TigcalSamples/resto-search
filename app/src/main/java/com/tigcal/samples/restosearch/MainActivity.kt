@@ -1,6 +1,7 @@
 package com.tigcal.samples.restosearch
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,20 +9,61 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import com.tigcal.samples.restosearch.network.MapRepository
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_CODE = 0
 
     private var searchQuery = ""
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var repository: MapRepository
+    private lateinit var viewModel: MapViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        repository = (application as RestoSearchApp).mapRepository
+        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MapViewModel(repository) as T
+            }
+        })[MapViewModel::class.java]
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.restaurants.collect {
+                        //TODO add to list
+                    }
+                }
+                launch {
+                    viewModel.error.collect { message ->
+                        if (message.isNotEmpty()) {
+                            displayErrorMessage(message)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -63,12 +105,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun searchRestaurant(query: String) {
         searchQuery = query
-        if (!hasLocationPermission()) {
-            requestLocationPermission()
+        if (hasLocationPermission()) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) viewModel.searchNearbyRestaurants(query, location)
+            }
         } else {
-            //TODO search now
+            requestLocationPermission()
         }
     }
 
@@ -90,5 +135,9 @@ class MainActivity : AppCompatActivity() {
         )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+    }
+
+    private fun displayErrorMessage(message: String) {
+        Snackbar.make(findViewById<View>(android.R.id.content).rootView, message, Snackbar.LENGTH_SHORT).show()
     }
 }

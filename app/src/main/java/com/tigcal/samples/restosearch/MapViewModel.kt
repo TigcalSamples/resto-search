@@ -1,5 +1,6 @@
 package com.tigcal.samples.restosearch
 
+import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tigcal.samples.restosearch.model.Restaurant
@@ -22,9 +23,10 @@ class MapViewModel(
     private val _error = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
-    fun searchNearbyRestaurants(keyword: String, location: String) {
+    fun searchNearbyRestaurants(keyword: String, location: Location) {
+        val latLong = "${location.latitude}%2C${location.longitude}"
         viewModelScope.launch(dispatcher) {
-            repository.getNearbyRestaurants(keyword, location, 1500, "restaurant", BuildConfig.MAPS_API_KEY)
+            repository.getNearbyRestaurants(keyword, latLong, 1500, "restaurant", BuildConfig.MAPS_API_KEY)
                 .catch {
                     _error.value = it.message.toString()
                 }.collect {

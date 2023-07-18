@@ -1,5 +1,6 @@
 package com.tigcal.samples.restosearch
 
+import android.location.Location
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.tigcal.samples.restosearch.model.Restaurant
@@ -37,9 +38,10 @@ class MapViewModelTest {
             } doReturn
                     flowOf(restaurants)
         }
+        val location: Location = mock()
 
         val viewModel = MapViewModel(repository, dispatcher)
-        viewModel.searchNearbyRestaurants("", "")
+        viewModel.searchNearbyRestaurants("", location)
 
         runTest {
             dispatcher.scheduler.advanceUntilIdle()
@@ -64,7 +66,8 @@ class MapViewModelTest {
         }
 
         val viewModel = MapViewModel(repository, dispatcher)
-        viewModel.searchNearbyRestaurants("", "")
+        val location: Location = mock()
+        viewModel.searchNearbyRestaurants("", location)
 
         runTest {
             dispatcher.scheduler.advanceUntilIdle()
