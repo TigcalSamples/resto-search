@@ -10,7 +10,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
-import android.view.View
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     private var searchQuery = ""
 
+    private val progressBar: ProgressBar by lazy { findViewById(R.id.progress_bar) }
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var repository: MapRepository
     private lateinit var viewModel: MapViewModel
@@ -60,11 +62,13 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.restaurants.collect {
                         //TODO add to list
+                        progressBar.isVisible = false
                         Log.d("Restaurants", "Restaurants: $it")
                     }
                 }
                 launch {
                     viewModel.error.collect { message ->
+                        progressBar.isVisible = false
                         if (message.isNotEmpty()) {
                             displayErrorMessage(message)
                         }
@@ -150,6 +154,7 @@ class MainActivity : AppCompatActivity() {
     private fun searchRestaurant(query: String) {
         searchQuery = query
         if (hasLocationPermission()) {
+            progressBar.isVisible = true
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) viewModel.searchNearbyRestaurants(query, location)
             }
@@ -179,6 +184,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayErrorMessage(message: String) {
-        Snackbar.make(findViewById<View>(android.R.id.content).rootView, message, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(recyclerView, message, Snackbar.LENGTH_SHORT).show()
     }
 }

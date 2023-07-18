@@ -24,9 +24,9 @@ class MapViewModel(
     val error: StateFlow<String> = _error
 
     fun searchNearbyRestaurants(keyword: String, location: Location) {
-        val latLong = "${location.latitude}%2C${location.longitude}"
+        val latLong = "${location.latitude},${location.longitude}"
         viewModelScope.launch(dispatcher) {
-            repository.getNearbyRestaurants(keyword, latLong, 1500, "restaurant", BuildConfig.MAPS_API_KEY)
+            repository.getNearbyRestaurants(keyword, latLong, 50_000, "restaurant", BuildConfig.MAPS_API_KEY)
                 .catch {
                     _error.value = it.message.toString()
                 }.collect {
