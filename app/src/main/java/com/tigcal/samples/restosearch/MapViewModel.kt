@@ -1,0 +1,35 @@
+package com.tigcal.samples.restosearch
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tigcal.samples.restosearch.model.Restaurant
+import com.tigcal.samples.restosearch.network.MapRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+
+class MapViewModel(
+    private val repository: MapRepository,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+): ViewModel() {
+
+    private val _restaurants = MutableStateFlow(emptyList<Restaurant>())
+    val restaurants: StateFlow<List<Restaurant>> = _restaurants
+
+    private val _error = MutableStateFlow("")
+    val error: StateFlow<String> = _error
+
+    fun searchNearbyRestaurants(keyword: String, location: String) {
+        viewModelScope.launch(dispatcher) {
+            repository.getNearbyRestaurants(keyword, location, 1500, "restaurant", BuildConfig.MAPS_API_KEY)
+                .catch {
+                    _error.value = it.message.toString()
+                }.collect {
+                    _restaurants.value = it
+                }
+        }
+    }
+}
