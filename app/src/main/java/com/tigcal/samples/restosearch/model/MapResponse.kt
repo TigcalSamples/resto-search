@@ -13,6 +13,6 @@ data class Restaurant(
     val id: String = "",
     val icon: String = "",
     val name: String = "",
-    val rating: String = "",
+    val rating: Float = 0f,
     val vicinity: String = ""
 )

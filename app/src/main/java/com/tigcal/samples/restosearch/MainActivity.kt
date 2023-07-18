@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var repository: MapRepository
     private lateinit var viewModel: MapViewModel
     private lateinit var recyclerView: RecyclerView
+    private lateinit var resturantAdapter: ResturantAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,13 +57,21 @@ class MainActivity : AppCompatActivity() {
             }
         })[MapViewModel::class.java]
 
+        resturantAdapter = ResturantAdapter(this)
+        recyclerView = findViewById(R.id.recycler_view)
+        recyclerView.apply {
+            setHasFixedSize(true)
+            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            adapter = resturantAdapter
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.restaurants.collect {
-                        //TODO add to list
+                        resturantAdapter.setRestaurants(it)
                         progressBar.isVisible = false
-                        Log.d("Restaurants", "Restaurants: $it")
+                        showList()
                     }
                 }
                 launch {
@@ -75,13 +83,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-
-        recyclerView = findViewById(R.id.recycler_view)
-        recyclerView.apply {
-            setHasFixedSize(true)
-            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-//            adapter =
         }
 
         val bottomNavigationView: BottomNavigationView? = findViewById(R.id.bottom_navigation)
