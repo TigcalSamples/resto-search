@@ -214,11 +214,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         this.googleMap = map
-        this.googleMap?.setOnMarkerClickListener { marker ->
-            val resto = restaurants[marker.tag.toString().toInt()]
-            openRestaurantDetails(resto)
-            false
+        this.googleMap?.let { gMap ->
+            gMap.uiSettings.isZoomControlsEnabled = true
+            gMap.setOnMarkerClickListener { marker ->
+                val resto = restaurants[marker.tag.toString().toInt()]
+                openRestaurantDetails(resto)
+                false
+            }
         }
+
         centerMapToCurrentLoc()
     }
 
