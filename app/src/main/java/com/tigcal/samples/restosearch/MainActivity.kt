@@ -24,13 +24,18 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
+import com.google.maps.android.ktx.addMarker
+import com.tigcal.samples.restosearch.model.Restaurant
+import com.tigcal.samples.restosearch.model.latLng
 import com.tigcal.samples.restosearch.network.MapRepository
 import kotlinx.coroutines.launch
 
@@ -38,6 +43,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val REQUEST_CODE = 0
     private var searchQuery = ""
     private var mapFragment: SupportMapFragment? = null
+    private var googleMap: GoogleMap? = null
 
     private val progressBar: ProgressBar by lazy { findViewById(R.id.progress_bar) }
 
@@ -88,9 +94,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.restaurants.collect {
-                        resturantAdapter.setRestaurants(it)
-                        progressBar.isVisible = false
+                    viewModel.restaurants.collect {restos ->
+                        displayRestaurants(restos)
                         bottomNavigationView.selectedItemId = R.id.action_list
                     }
                 }
@@ -204,6 +209,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: GoogleMap) {
+        this.googleMap = map
+        centerMapToCurrentLoc()
+    }
 
+    private fun centerMapToCurrentLoc() {
+        viewModel.lastKnownLocation?.let { location ->
+            this.googleMap?.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 15f)
+            )
+        }
+    }
+
+    private fun displayRestaurants(restos: List<Restaurant>) {
+        progressBar.isVisible = false
+        resturantAdapter.setRestaurants(restos)
+
+        centerMapToCurrentLoc()
+        
+        restos.forEach {  resto ->
+            googleMap?.addMarker {
+                position(LatLng(resto.latLng.first, resto.latLng.second))
+                title(resto.name)
+            }
+        }
     }
 }

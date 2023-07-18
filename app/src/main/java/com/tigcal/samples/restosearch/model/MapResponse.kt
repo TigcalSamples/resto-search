@@ -14,5 +14,18 @@ data class Restaurant(
     val icon: String = "",
     val name: String = "",
     val rating: Float = 0f,
-    val vicinity: String = ""
+    val vicinity: String = "",
+    val geometry: Geometry
 )
+
+data class Geometry(
+    val location: GeometryLocation
+)
+
+data class GeometryLocation(
+    val lat: Float = 0f,
+    val lng: Float = 0f
+)
+
+val Restaurant.latLng: Pair<Double, Double>
+    get() = geometry.location.lat.toDouble() to geometry.location.lng.toDouble()

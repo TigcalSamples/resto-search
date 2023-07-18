@@ -23,7 +23,11 @@ class MapViewModel(
     private val _error = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
+    var lastKnownLocation: Location? = null
+
     fun searchNearbyRestaurants(keyword: String, location: Location) {
+        lastKnownLocation = location
+
         val latLong = "${location.latitude},${location.longitude}"
         viewModelScope.launch(dispatcher) {
             repository.getNearbyRestaurants(keyword, latLong, 50_000, "restaurant", BuildConfig.MAPS_API_KEY)
