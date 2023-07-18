@@ -24,6 +24,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
@@ -31,10 +34,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.tigcal.samples.restosearch.network.MapRepository
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val REQUEST_CODE = 0
-
     private var searchQuery = ""
+    private var mapFragment: SupportMapFragment? = null
 
     private val progressBar: ProgressBar by lazy { findViewById(R.id.progress_bar) }
 
@@ -49,6 +52,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
 
         repository = (application as RestoSearchApp).mapRepository
         viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
@@ -65,13 +70,28 @@ class MainActivity : AppCompatActivity() {
             adapter = resturantAdapter
         }
 
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
+            when(item.itemId) {
+                R.id.action_list -> {
+                    showList()
+                    return@OnItemSelectedListener true
+                }
+                R.id.action_map -> {
+                    showMap()
+                    return@OnItemSelectedListener true
+                }
+            }
+            false
+        })
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.restaurants.collect {
                         resturantAdapter.setRestaurants(it)
                         progressBar.isVisible = false
-                        showList()
+                        bottomNavigationView.selectedItemId = R.id.action_list
                     }
                 }
                 launch {
@@ -85,20 +105,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val bottomNavigationView: BottomNavigationView? = findViewById(R.id.bottom_navigation)
-        bottomNavigationView?.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
-            when(item.itemId) {
-                R.id.action_list -> {
-                    showList()
-                    return@OnItemSelectedListener true
-                }
-                R.id.action_map -> {
-                    showMap()
-                    return@OnItemSelectedListener true
-                }
-            }
-            false
-        })
+        showList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -142,11 +149,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun showList() {
         recyclerView.isVisible = true
-        //TODO hide map
+        mapFragment?.let {
+            supportFragmentManager.beginTransaction()
+                .hide(it)
+                .commit()
+        }
     }
 
     private fun showMap() {
-        //TODO show map
+        mapFragment?.let {
+            supportFragmentManager.beginTransaction()
+                .show(it)
+                .commit()
+        }
         recyclerView.isVisible = false
     }
 
@@ -186,5 +201,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayErrorMessage(message: String) {
         Snackbar.make(recyclerView, message, Snackbar.LENGTH_SHORT).show()
+    }
+
+    override fun onMapReady(map: GoogleMap) {
+
     }
 }
