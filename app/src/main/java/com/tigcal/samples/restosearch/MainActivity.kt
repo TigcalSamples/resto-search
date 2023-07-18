@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var searchQuery = ""
     private var mapFragment: SupportMapFragment? = null
     private var googleMap: GoogleMap? = null
+    private var restaurants = emptyList<Restaurant>()
 
     private val progressBar: ProgressBar by lazy { findViewById(R.id.progress_bar) }
 
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         })[MapViewModel::class.java]
 
         resturantAdapter = ResturantAdapter(this)
+        resturantAdapter.onClickListener = { resto -> openRestaurantDetails(resto) }
+
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.apply {
             setHasFixedSize(true)
@@ -210,6 +214,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         this.googleMap = map
+        this.googleMap?.setOnMarkerClickListener { marker ->
+            val resto = restaurants[marker.tag.toString().toInt()]
+            openRestaurantDetails(resto)
+            false
+        }
         centerMapToCurrentLoc()
     }
 
@@ -222,16 +231,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayRestaurants(restos: List<Restaurant>) {
+        restaurants = restos
+
         progressBar.isVisible = false
         resturantAdapter.setRestaurants(restos)
 
         centerMapToCurrentLoc()
-        
-        restos.forEach {  resto ->
+
+        restos.forEachIndexed { index, resto ->
             googleMap?.addMarker {
                 position(LatLng(resto.latLng.first, resto.latLng.second))
                 title(resto.name)
-            }
+            }?.tag = index
         }
+    }
+
+    private fun openRestaurantDetails(resto: Restaurant) {
+        Log.d("resto", "open: $resto")
     }
 }

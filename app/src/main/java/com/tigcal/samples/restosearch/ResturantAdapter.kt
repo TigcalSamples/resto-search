@@ -13,6 +13,8 @@ import com.tigcal.samples.restosearch.model.Restaurant
 class ResturantAdapter(private val context: Context): RecyclerView.Adapter<ResturantAdapter.ViewHolder>() {
     private var restaurants = mutableListOf<Restaurant>()
 
+    var onClickListener: (Restaurant) -> Unit = {}
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_restaurant, parent, false)
         return ViewHolder(view)
@@ -33,6 +35,9 @@ class ResturantAdapter(private val context: Context): RecyclerView.Adapter<Restu
                 .placeholder(R.mipmap.ic_launcher)
                 .fitCenter()
                 .into(holder.imageView)
+        }
+        holder.itemView.setOnClickListener {
+            onClickListener(resto)
         }
     }
 
