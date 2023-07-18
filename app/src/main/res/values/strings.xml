@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">RestoSearch</string>
 
+    <string name="menu_list">List</string>
+    <string name="menu_map">Map</string>
     <string name="menu_search">Search</string>
 
     <string name="permission_needed">Location permission is needed to search for nearby restaurants.</string>
