@@ -62,7 +62,7 @@ class RestaurantActivity : AppCompatActivity() {
                     nutritionixViewModel.menuItems.collect {
                         progressBar.isVisible = false
                         menuItemAdapter.setMenuItems(it)
-                        if (it.isEmpty()) emptyText.isVisible = true
+                        emptyText.isVisible = it.isEmpty()
                     }
                 }
                 launch {
