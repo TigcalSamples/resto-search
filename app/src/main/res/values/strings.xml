@@ -11,4 +11,6 @@
 
     <string name="restaurant">Restaurant</string>
     <string name="restaurants_empty">There are no restaurants to display.</string>
+
+    <string name="menu_items_empty">There are no menu items to display.</string>
 </resources>

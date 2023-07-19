@@ -11,7 +11,7 @@ data class MenuItem(
     val name: String,
     @field:Json(name = "nf_calories")
     val calories: String,
-    private val photo: Photo
+    val photo: Photo
 )
 
 data class Photo(
