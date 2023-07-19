@@ -15,6 +15,7 @@ class RestaurantActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val EXTRA_BRAND_ID = "com.tigcal.samples.restosearch.resto.brandid"
         const val EXTRA_NAME = "com.tigcal.samples.restosearch.resto"
     }
 }

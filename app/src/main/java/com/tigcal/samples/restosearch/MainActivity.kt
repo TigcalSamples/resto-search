@@ -262,9 +262,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun openRestaurantDetails(resto: Restaurant) {
-        Log.d("resto", "open: $resto")
         val intent = Intent(this, RestaurantActivity::class.java).apply {
             putExtra(RestaurantActivity.EXTRA_NAME, resto.name)
+            putExtra(RestaurantActivity.EXTRA_BRAND_ID, nutritionixViewModel.getBrandId(resto.name))
 
         }
         startActivity(intent)
