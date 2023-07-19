@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +36,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.maps.android.ktx.addMarker
 import com.tigcal.samples.restosearch.model.Restaurant
 import com.tigcal.samples.restosearch.model.latLng
-import com.tigcal.samples.restosearch.network.MapRepository
 import com.tigcal.samples.restosearch.util.NutritionixUtil
 import kotlinx.coroutines.launch
 
@@ -51,7 +49,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val progressBar: ProgressBar by lazy { findViewById(R.id.progress_bar) }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var repository: MapRepository
     private lateinit var mapViewModel: MapViewModel
     private lateinit var nutritionixViewModel: NutritionixViewModel
     private lateinit var recyclerView: RecyclerView
@@ -65,13 +62,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
 
-        repository = (application as RestoSearchApp).mapRepository
+        val mapRepository = (application as RestoSearchApp).mapRepository
         mapViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return MapViewModel(repository) as T
+                return MapViewModel(mapRepository) as T
             }
         })[MapViewModel::class.java]
-        nutritionixViewModel = NutritionixViewModel()
+
+        val nutritionixRepository = (application as RestoSearchApp).nutritionixRepository
+        nutritionixViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return NutritionixViewModel(nutritionixRepository) as T
+            }
+        })[NutritionixViewModel::class.java]
 
         resturantAdapter = ResturantAdapter(this)
         resturantAdapter.onClickListener = { resto -> openRestaurantDetails(resto) }
