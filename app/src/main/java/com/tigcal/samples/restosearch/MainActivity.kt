@@ -243,9 +243,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         restaurants = restos
 
         progressBar.isVisible = false
-        resturantAdapter.setRestaurants(restos)
-
+        googleMap?.clear()
         centerMapToCurrentLoc()
+
+        if (restos.isEmpty()) {
+            displayErrorMessage(getString(R.string.restaurants_empty))
+            return
+        }
+
+        resturantAdapter.setRestaurants(restos)
 
         restos.forEachIndexed { index, resto ->
             googleMap?.addMarker {

@@ -42,8 +42,9 @@ class ResturantAdapter(private val context: Context): RecyclerView.Adapter<Restu
     }
 
     fun setRestaurants(restos: List<Restaurant>) {
+        this.restaurants.clear()
         this.restaurants.addAll(restos)
-        notifyItemRangeInserted(0, restos.size)
+        notifyItemInserted(restos.size)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
