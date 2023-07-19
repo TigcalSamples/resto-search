@@ -42,9 +42,8 @@ class ResturantAdapter(private val context: Context): RecyclerView.Adapter<Restu
     }
 
     fun setRestaurants(restos: List<Restaurant>) {
-        this.restaurants.clear()
-        this.restaurants.addAll(restos)
-        notifyItemInserted(restos.size)
+        this.restaurants = restos.toMutableList()
+        notifyItemChanged(0)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

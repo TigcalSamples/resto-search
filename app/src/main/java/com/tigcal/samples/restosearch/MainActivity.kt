@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun centerMapToCurrentLoc() {
         mapViewModel.lastKnownLocation?.let { location ->
             this.googleMap?.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 15f)
+                CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 10f)
             )
         }
     }
