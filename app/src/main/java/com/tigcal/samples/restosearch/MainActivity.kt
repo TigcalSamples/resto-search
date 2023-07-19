@@ -38,6 +38,7 @@ import com.google.maps.android.ktx.addMarker
 import com.tigcal.samples.restosearch.model.Restaurant
 import com.tigcal.samples.restosearch.model.latLng
 import com.tigcal.samples.restosearch.network.MapRepository
+import com.tigcal.samples.restosearch.util.NutritionixUtil
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -51,7 +52,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var repository: MapRepository
-    private lateinit var viewModel: MapViewModel
+    private lateinit var mapViewModel: MapViewModel
+    private lateinit var nutritionixViewModel: NutritionixViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var resturantAdapter: ResturantAdapter
 
@@ -64,11 +66,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
 
         repository = (application as RestoSearchApp).mapRepository
-        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+        mapViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return MapViewModel(repository) as T
             }
         })[MapViewModel::class.java]
+        nutritionixViewModel = NutritionixViewModel()
 
         resturantAdapter = ResturantAdapter(this)
         resturantAdapter.onClickListener = { resto -> openRestaurantDetails(resto) }
@@ -95,16 +98,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             false
         })
 
+        val nutritionixBrands = NutritionixUtil.getBrands(this, "nutritionix_brands.json")
+        nutritionixViewModel.nutritionixBrands = nutritionixBrands
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.restaurants.collect {restos ->
+                    mapViewModel.restaurants.collect { restos ->
                         displayRestaurants(restos)
                         bottomNavigationView.selectedItemId = R.id.action_list
                     }
                 }
                 launch {
-                    viewModel.error.collect { message ->
+                    mapViewModel.error.collect { message ->
                         progressBar.isVisible = false
                         if (message.isNotEmpty()) {
                             displayErrorMessage(message)
@@ -181,7 +187,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         if (hasLocationPermission()) {
             progressBar.isVisible = true
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) viewModel.searchNearbyRestaurants(query, location)
+                if (location != null) mapViewModel.searchNearbyRestaurants(query, location)
             }
         } else {
             requestLocationPermission()
@@ -226,7 +232,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun centerMapToCurrentLoc() {
-        viewModel.lastKnownLocation?.let { location ->
+        mapViewModel.lastKnownLocation?.let { location ->
             this.googleMap?.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 15f)
             )
