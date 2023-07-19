@@ -216,10 +216,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         this.googleMap = map
         this.googleMap?.let { gMap ->
             gMap.uiSettings.isZoomControlsEnabled = true
-            gMap.setOnMarkerClickListener { marker ->
+            gMap.setOnInfoWindowClickListener { marker ->
                 val resto = restaurants[marker.tag.toString().toInt()]
                 openRestaurantDetails(resto)
-                false
             }
         }
 
