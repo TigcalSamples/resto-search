@@ -2,6 +2,8 @@ package com.tigcal.samples.restosearch
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
+import com.tigcal.samples.restosearch.model.Geometry
+import com.tigcal.samples.restosearch.model.GeometryLocation
 import com.tigcal.samples.restosearch.model.MapResponse
 import com.tigcal.samples.restosearch.model.Restaurant
 import com.tigcal.samples.restosearch.network.MapRepository
@@ -29,7 +31,9 @@ class MapRepositoryTest {
 
     @Test
     fun getNearbyRestaurants() {
-        val restaurants = listOf(Restaurant(id = "A"), Restaurant(id = "B"))
+        val geometry = Geometry(GeometryLocation(5f, 6f))
+        val restaurants = listOf(Restaurant(id = "A", geometry=geometry),
+            Restaurant(id = "B", geometry=geometry))
         val response = MapResponse(restaurants = restaurants)
 
         val service: MapService = mock {
