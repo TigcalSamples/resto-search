@@ -254,9 +254,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
 
-        resturantAdapter.setRestaurants(restos)
+        val restaurants = restos.map {
+            val logo = nutritionixViewModel.getBrandLogo(it.name)
+            it.copy(
+                icon = logo.ifEmpty { it.icon }
+            )
 
-        restos.forEachIndexed { index, resto ->
+        }
+
+        resturantAdapter.setRestaurants(restaurants)
+
+        restaurants.forEachIndexed { index, resto ->
             googleMap?.addMarker {
                 position(LatLng(resto.latLng.first, resto.latLng.second))
                 title(resto.name)

@@ -26,6 +26,12 @@ class NutritionixViewModel(
         }?.id ?: ""
     }
 
+    fun getBrandLogo(restaurant: String): String {
+        return nutritionixBrands.find {
+            it.name.uppercase() == restaurant.uppercase()
+        }?.logo ?: ""
+    }
+
     private val _menuItems = MutableStateFlow(emptyList<MenuItem>())
     val menuItems: StateFlow<List<MenuItem>> = _menuItems
 
