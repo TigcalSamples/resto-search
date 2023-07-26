@@ -1,7 +1,6 @@
 RestoSearch
 ============================
-An Android app for searching nearby restaurants using Google Maps API
-and displaying menu items using Nutritionix API.
+An Android app for searching nearby restaurants using [Google Maps API](https://developers.google.com/maps) and displaying menu items using [Nutritionix API](https://developer.nutritionix.com).
 
 TODO:
  - Add Google Maps API key as MAPS_API_KEY in the local.properties file
